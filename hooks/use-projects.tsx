@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/hooks/use-auth'
 import { slugify } from '@/lib/utils'
@@ -7,6 +7,12 @@ import type { Database } from '@/lib/supabase'
 type Project = Database['public']['Tables']['projects']['Row']
 type ProjectInsert = Database['public']['Tables']['projects']['Insert']
 type ProjectUpdate = Database['public']['Tables']['projects']['Update']
+
+interface CachedProjectsData {
+  projects: Project[]
+  timestamp: number
+  userId: string
+}
 
 interface UseProjectsReturn {
   projects: Project[]
@@ -19,13 +25,62 @@ interface UseProjectsReturn {
   refreshProjects: () => Promise<void>
 }
 
+const CACHE_KEY = 'projects_cache'
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+const MIN_LOADING_TIME = 800 // Minimum loading time in milliseconds
+
 export function useProjects(): UseProjectsReturn {
   const { user } = useAuth()
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const loadingStartTime = useRef<number>(0)
 
-  const fetchProjects = async () => {
+  const getCachedProjects = (userId: string): Project[] | null => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY)
+      if (!cached) return null
+
+      const data: CachedProjectsData = JSON.parse(cached)
+      
+      // Check if cache is valid (same user and not expired)
+      if (
+        data.userId === userId &&
+        Date.now() - data.timestamp < CACHE_DURATION
+      ) {
+        return data.projects
+      }
+      
+      // Remove expired cache
+      localStorage.removeItem(CACHE_KEY)
+      return null
+    } catch {
+      localStorage.removeItem(CACHE_KEY)
+      return null
+    }
+  }
+
+  const setCachedProjects = (projects: Project[], userId: string) => {
+    try {
+      const data: CachedProjectsData = {
+        projects,
+        timestamp: Date.now(),
+        userId
+      }
+      localStorage.setItem(CACHE_KEY, JSON.stringify(data))
+    } catch {
+      // Ignore cache errors
+    }
+  }
+
+  const ensureMinimumLoadingTime = async (startTime: number) => {
+    const elapsed = Date.now() - startTime
+    if (elapsed < MIN_LOADING_TIME) {
+      await new Promise(resolve => setTimeout(resolve, MIN_LOADING_TIME - elapsed))
+    }
+  }
+
+  const fetchProjects = async (showLoading = true) => {
     if (!user) {
       setProjects([])
       setLoading(false)
@@ -33,7 +88,33 @@ export function useProjects(): UseProjectsReturn {
     }
 
     try {
-      setLoading(true)
+      // Check cache first
+      const cachedProjects = getCachedProjects(user.id)
+      
+      if (cachedProjects) {
+        // Use cached data immediately
+        setProjects(cachedProjects)
+        setLoading(false)
+        
+        // Fetch fresh data in background
+        const { data, error: fetchError } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        if (!fetchError && data) {
+          setProjects(data)
+          setCachedProjects(data, user.id)
+        }
+        return
+      }
+
+      // No cache available, show loading and fetch data
+      if (showLoading) {
+        setLoading(true)
+        loadingStartTime.current = Date.now()
+      }
       setError(null)
 
       const { data, error: fetchError } = await supabase
@@ -46,8 +127,17 @@ export function useProjects(): UseProjectsReturn {
         throw fetchError
       }
 
+      // Ensure minimum loading time for better UX
+      if (showLoading) {
+        await ensureMinimumLoadingTime(loadingStartTime.current)
+      }
+
       setProjects(data || [])
+      setCachedProjects(data || [], user.id)
     } catch (err) {
+      if (showLoading) {
+        await ensureMinimumLoadingTime(loadingStartTime.current)
+      }
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
       setLoading(false)
@@ -77,8 +167,10 @@ export function useProjects(): UseProjectsReturn {
         throw createError
       }
 
-      // Update local state
-      setProjects(prev => [data, ...prev])
+      // Update local state and cache
+      const newProjects = [data, ...projects]
+      setProjects(newProjects)
+      setCachedProjects(newProjects, user.id)
 
       return { data, error: null }
     } catch (err) {
@@ -100,12 +192,12 @@ export function useProjects(): UseProjectsReturn {
         throw updateError
       }
 
-      // Update local state
-      setProjects(prev => 
-        prev.map(project => 
-          project.id === id ? data : project
-        )
+      // Update local state and cache
+      const updatedProjects = projects.map(project => 
+        project.id === id ? data : project
       )
+      setProjects(updatedProjects)
+      setCachedProjects(updatedProjects, user?.id || '')
 
       return { data, error: null }
     } catch (err) {
@@ -125,8 +217,10 @@ export function useProjects(): UseProjectsReturn {
         throw deleteError
       }
 
-      // Update local state
-      setProjects(prev => prev.filter(project => project.id !== id))
+      // Update local state and cache
+      const filteredProjects = projects.filter(project => project.id !== id)
+      setProjects(filteredProjects)
+      setCachedProjects(filteredProjects, user?.id || '')
 
       return { error: null }
     } catch (err) {
@@ -155,7 +249,11 @@ export function useProjects(): UseProjectsReturn {
   }
 
   const refreshProjects = async () => {
-    await fetchProjects()
+    // Clear cache and force fresh fetch
+    if (user) {
+      localStorage.removeItem(CACHE_KEY)
+    }
+    await fetchProjects(true)
   }
 
   useEffect(() => {

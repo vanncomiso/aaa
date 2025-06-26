@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useProjects } from '@/hooks/use-projects'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -21,6 +20,16 @@ const filterTabs = [
   { name: "Featured", active: true },
   { name: "Most used", active: false },
   { name: "Trending", active: false }
+]
+
+// Project preview images - using Pexels for stock photos
+const projectImages = [
+  "https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop",
+  "https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop",
+  "https://images.pexels.com/photos/3184338/pexels-photo-3184338.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop",
+  "https://images.pexels.com/photos/3184465/pexels-photo-3184465.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop",
+  "https://images.pexels.com/photos/3184639/pexels-photo-3184639.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop",
+  "https://images.pexels.com/photos/3861458/pexels-photo-3861458.jpeg?auto=compress&cs=tinysrgb&w=800&h=600&fit=crop"
 ]
 
 export function Projects() {
@@ -36,43 +45,41 @@ export function Projects() {
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
-  // Enhanced skeleton loader component based on reference design
+  // Enhanced skeleton loader component with improved visual design
   const ProjectSkeleton = () => (
-    <Card className="group bg-sidebar border-sidebar-border overflow-hidden animate-pulse">
-      {/* Project Preview Skeleton - Gradient background like reference */}
-      <div className="aspect-[4/3] bg-sidebar-accent flex items-center justify-center relative">
-        {/* Central icon placeholder - larger and more prominent */}
-        <div className="w-16 h-16 bg-sidebar-foreground/10 rounded-full flex items-center justify-center">
-          <div className="w-8 h-8 bg-sidebar-foreground/20 rounded-full" />
-        </div>
+    <Card className="group bg-sidebar-accent border-sidebar-border overflow-hidden">
+      {/* Project Preview Skeleton - Full gradient with pulse animation */}
+      <div className="aspect-[4/3] bg-gradient-to-br from-sidebar-border via-sidebar-accent to-sidebar-border animate-pulse relative overflow-hidden">
+        {/* Subtle shimmer effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-sidebar-foreground/5 to-transparent animate-pulse"></div>
       </div>
       
-      {/* Project Info Skeleton - Better spacing and realistic elements */}
+      {/* Project Info Skeleton */}
       <div className="p-4 space-y-3">
         {/* Author info section */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            {/* Avatar skeleton - gradient circle like profile pics */}
-            <div className="w-6 h-6 rounded-full bg-sidebar-foreground/20" />
+            {/* Avatar skeleton */}
+            <div className="w-6 h-6 rounded-full bg-sidebar-border animate-pulse" />
             <div className="min-w-0 flex-1">
-              {/* Author name skeleton - more realistic width */}
-              <div className="h-3 w-20 mb-1 bg-sidebar-border rounded-full" />
+              {/* Author name skeleton */}
+              <div className="h-3 w-20 mb-1 bg-sidebar-border rounded-full animate-pulse" />
             </div>
           </div>
           {/* PRO badge skeleton */}
-          <div className="h-5 w-10 bg-sidebar-foreground/10 rounded-full" />
+          <div className="h-5 w-10 bg-sidebar-border rounded-full animate-pulse" />
         </div>
         
-        {/* Project Title Skeleton - more realistic project name length */}
-        <div className="h-5 w-28 bg-sidebar-foreground/15 rounded-full mb-3" />
+        {/* Project Title Skeleton */}
+        <div className="h-5 w-28 bg-sidebar-border rounded-full mb-3 animate-pulse" />
         
-        {/* Category Badge Skeleton - pill shaped like "Your Project" */}
-        <div className="h-6 w-24 bg-sidebar-foreground/10 border border-sidebar-foreground/20 rounded-full" />
+        {/* Category Badge Skeleton */}
+        <div className="h-6 w-24 bg-sidebar-border border border-sidebar-border rounded-full animate-pulse" />
       </div>
     </Card>
   )
 
-  // Format user projects for display
+  // Format user projects for display with images
   const formattedUserProjects = React.useMemo(() => {
     return userProjects.map((project, index) => ({
       id: `user-${project.id}`,
@@ -83,7 +90,7 @@ export function Projects() {
       isPro: project.plan !== 'personal',
       category: "Your Projects",
       preview: {
-        bgColor: ["bg-blue-600", "bg-green-500", "bg-purple-600", "bg-orange-500"][index % 4],
+        imageUrl: projectImages[index % projectImages.length],
         textColor: "text-white",
         content: "🚀"
       }
@@ -215,11 +222,14 @@ export function Projects() {
                     className="group bg-sidebar-accent border-sidebar-border hover:border-sidebar-foreground/20 transition-all duration-200 cursor-pointer overflow-hidden"
                     onClick={() => project.slug && handleProjectClick(project.slug)}
                   >
-                    {/* Project Preview */}
-                    <div className={`${project.preview.bgColor} ${project.preview.textColor} aspect-[4/3] flex items-center justify-center text-4xl sm:text-5xl relative overflow-hidden`}>
-                      <div className="text-6xl sm:text-7xl opacity-80">
-                        {project.preview.content}
-                      </div>
+                    {/* Project Preview with Image */}
+                    <div className="aspect-[4/3] relative overflow-hidden">
+                      <img
+                        src={project.preview.imageUrl}
+                        alt={project.title}
+                        className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                        loading="lazy"
+                      />
                       
                       {/* Hover overlay */}
                       <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
