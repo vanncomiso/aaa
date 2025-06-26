@@ -46,19 +46,19 @@ export function Projects() {
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <Skeleton className="w-6 h-6 rounded-full bg-sidebar-border/30" />
+            <Skeleton className="w-6 h-6 rounded-full bg-sidebar-border/60" />
             <div className="min-w-0 flex-1">
-              <Skeleton className="h-4 w-20 mb-1 bg-sidebar-border/30" />
-              <Skeleton className="h-3 w-12 bg-sidebar-border/30" />
+              <Skeleton className="h-4 w-20 mb-1 bg-sidebar-border/60" />
+              <Skeleton className="h-3 w-12 bg-sidebar-border/60" />
             </div>
           </div>
         </div>
         
         {/* Project Title Skeleton */}
-        <Skeleton className="h-4 w-32 mb-2 bg-sidebar-border/30" />
+        <Skeleton className="h-4 w-32 mb-2 bg-sidebar-border/60" />
         
         {/* Category Badge Skeleton */}
-        <Skeleton className="h-5 w-24 bg-sidebar-border/30" />
+        <Skeleton className="h-5 w-24 bg-sidebar-border/60" />
       </div>
     </Card>
   )
