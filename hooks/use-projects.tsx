@@ -26,18 +26,48 @@ interface UseProjectsReturn {
 }
 
 const CACHE_KEY = 'projects_cache'
-const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
-const MIN_LOADING_TIME = 800 // Minimum loading time in milliseconds
+const CACHE_DURATION = 10 * 60 * 1000 // 10 minutes - longer cache duration
+const MIN_LOADING_TIME = 600 // Reduced minimum loading time
 
+// Global cache to persist across component unmounts
+let globalProjectsCache: { [userId: string]: { projects: Project[], timestamp: number } } = {}
 export function useProjects(): UseProjectsReturn {
   const { user } = useAuth()
-  const [projects, setProjects] = useState<Project[]>([])
-  const [loading, setLoading] = useState(true)
+  const [projects, setProjects] = useState<Project[]>(() => {
+    // Initialize with cached data if available
+    if (user?.id && globalProjectsCache[user.id]) {
+      const cached = globalProjectsCache[user.id]
+      if (Date.now() - cached.timestamp < CACHE_DURATION) {
+        return cached.projects
+      }
+    }
+    return []
+  })
+  const [loading, setLoading] = useState(() => {
+    // Only show loading if we don't have cached data
+    if (user?.id && globalProjectsCache[user.id]) {
+      const cached = globalProjectsCache[user.id]
+      if (Date.now() - cached.timestamp < CACHE_DURATION) {
+        return false
+      }
+    }
+    return true
+  })
   const [error, setError] = useState<string | null>(null)
   const loadingStartTime = useRef<number>(0)
+  const hasFetchedOnce = useRef<boolean>(false)
 
   const getCachedProjects = (userId: string): Project[] | null => {
     try {
+      // Check global cache first
+      if (globalProjectsCache[userId]) {
+        const cached = globalProjectsCache[userId]
+        if (Date.now() - cached.timestamp < CACHE_DURATION) {
+          return cached.projects
+        }
+      }
+
+      // Check localStorage cache
       const cached = localStorage.getItem(CACHE_KEY)
       if (!cached) return null
 
@@ -48,23 +78,39 @@ export function useProjects(): UseProjectsReturn {
         data.userId === userId &&
         Date.now() - data.timestamp < CACHE_DURATION
       ) {
+        // Update global cache
+        globalProjectsCache[userId] = {
+          projects: data.projects,
+          timestamp: data.timestamp
+        }
         return data.projects
       }
       
       // Remove expired cache
       localStorage.removeItem(CACHE_KEY)
+      delete globalProjectsCache[userId]
       return null
     } catch {
       localStorage.removeItem(CACHE_KEY)
+      if (userId) delete globalProjectsCache[userId]
       return null
     }
   }
 
   const setCachedProjects = (projects: Project[], userId: string) => {
     try {
+      const timestamp = Date.now()
+      
+      // Update global cache
+      globalProjectsCache[userId] = {
+        projects,
+        timestamp
+      }
+
+      // Update localStorage cache
       const data: CachedProjectsData = {
         projects,
-        timestamp: Date.now(),
+        timestamp,
         userId
       }
       localStorage.setItem(CACHE_KEY, JSON.stringify(data))
@@ -80,7 +126,7 @@ export function useProjects(): UseProjectsReturn {
     }
   }
 
-  const fetchProjects = async (showLoading = true) => {
+  const fetchProjects = async (forceLoading = false) => {
     if (!user) {
       setProjects([])
       setLoading(false)
@@ -95,23 +141,26 @@ export function useProjects(): UseProjectsReturn {
         // Use cached data immediately
         setProjects(cachedProjects)
         setLoading(false)
+        hasFetchedOnce.current = true
         
-        // Fetch fresh data in background
-        const { data, error: fetchError } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
+        const cacheAge = Date.now() - (globalProjectsCache[user.id]?.timestamp || 0)
+        if (cacheAge > CACHE_DURATION / 2) { // Refresh when cache is half expired
+          const { data, error: fetchError } = await supabase
+            .from('projects')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
 
-        if (!fetchError && data) {
-          setProjects(data)
-          setCachedProjects(data, user.id)
+          if (!fetchError && data) {
+            setProjects(data)
+            setCachedProjects(data, user.id)
+          }
         }
         return
       }
 
       // No cache available, show loading and fetch data
-      if (showLoading) {
+      if (!hasFetchedOnce.current || forceLoading) {
         setLoading(true)
         loadingStartTime.current = Date.now()
       }
@@ -128,14 +177,15 @@ export function useProjects(): UseProjectsReturn {
       }
 
       // Ensure minimum loading time for better UX
-      if (showLoading) {
+      if (!hasFetchedOnce.current || forceLoading) {
         await ensureMinimumLoadingTime(loadingStartTime.current)
       }
 
       setProjects(data || [])
       setCachedProjects(data || [], user.id)
+      hasFetchedOnce.current = true
     } catch (err) {
-      if (showLoading) {
+      if (!hasFetchedOnce.current || forceLoading) {
         await ensureMinimumLoadingTime(loadingStartTime.current)
       }
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -252,6 +302,8 @@ export function useProjects(): UseProjectsReturn {
     // Clear cache and force fresh fetch
     if (user) {
       localStorage.removeItem(CACHE_KEY)
+      delete globalProjectsCache[user.id]
+      hasFetchedOnce.current = false
     }
     await fetchProjects(true)
   }
