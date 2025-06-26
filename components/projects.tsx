@@ -38,16 +38,13 @@ export function Projects() {
 
   // Enhanced skeleton loader component based on reference design
   const ProjectSkeleton = () => (
-    <Card className="group bg-sidebar-accent border-sidebar-border overflow-hidden animate-pulse">
+    <Card className="group bg-sidebar border-sidebar-border overflow-hidden animate-pulse">
       {/* Project Preview Skeleton - Gradient background like reference */}
-      <div className="aspect-[4/3] bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 flex items-center justify-center relative">
+      <div className="aspect-[4/3] bg-sidebar-accent flex items-center justify-center relative">
         {/* Central icon placeholder - larger and more prominent */}
-        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-          <div className="w-8 h-8 bg-white/40 rounded-full" />
+        <div className="w-16 h-16 bg-sidebar-foreground/10 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-sidebar-foreground/20 rounded-full" />
         </div>
-        
-        {/* Subtle overlay for depth */}
-        <div className="absolute inset-0 bg-black/10" />
       </div>
       
       {/* Project Info Skeleton - Better spacing and realistic elements */}
@@ -56,21 +53,21 @@ export function Projects() {
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {/* Avatar skeleton - gradient circle like profile pics */}
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500" />
+            <div className="w-6 h-6 rounded-full bg-sidebar-foreground/20" />
             <div className="min-w-0 flex-1">
               {/* Author name skeleton - more realistic width */}
               <div className="h-3 w-20 mb-1 bg-sidebar-border rounded-full" />
             </div>
           </div>
           {/* PRO badge skeleton */}
-          <div className="h-5 w-10 bg-sidebar-border rounded-full" />
+          <div className="h-5 w-10 bg-sidebar-foreground/10 rounded-full" />
         </div>
         
         {/* Project Title Skeleton - more realistic project name length */}
-        <div className="h-5 w-28 bg-sidebar-border rounded-full mb-3" />
+        <div className="h-5 w-28 bg-sidebar-foreground/15 rounded-full mb-3" />
         
         {/* Category Badge Skeleton - pill shaped like "Your Project" */}
-        <div className="h-6 w-24 bg-blue-500/20 border border-blue-500/30 rounded-full" />
+        <div className="h-6 w-24 bg-sidebar-foreground/10 border border-sidebar-foreground/20 rounded-full" />
       </div>
     </Card>
   )
