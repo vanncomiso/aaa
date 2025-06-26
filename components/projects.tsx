@@ -38,27 +38,36 @@ export function Projects() {
 
   // Skeleton loader component
   const ProjectSkeleton = () => (
-    <Card className="group bg-sidebar-accent border-sidebar-border overflow-hidden">
+    <Card className="group bg-sidebar-accent border-sidebar-border overflow-hidden animate-pulse">
       {/* Project Preview Skeleton */}
-      <div className="aspect-[4/3] bg-sidebar-border/50 animate-pulse" />
+      <div className="aspect-[4/3] bg-gradient-to-br from-sidebar-border/40 to-sidebar-border/20 relative overflow-hidden">
+        {/* Shimmer effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-sidebar-foreground/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+        {/* Placeholder icon */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-lg bg-sidebar-border/30 flex items-center justify-center">
+            <div className="w-6 h-6 rounded bg-sidebar-border/50" />
+          </div>
+        </div>
+      </div>
       
       {/* Project Info Skeleton */}
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <Skeleton className="w-6 h-6 rounded-full bg-sidebar-border/60" />
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-500/20 border border-sidebar-border/30" />
             <div className="min-w-0 flex-1">
-              <Skeleton className="h-4 w-20 mb-1 bg-sidebar-border/60" />
-              <Skeleton className="h-3 w-12 bg-sidebar-border/60" />
+              <div className="h-3 w-16 mb-1 bg-sidebar-border/40 rounded animate-pulse" />
+              <div className="h-2 w-8 bg-sidebar-border/30 rounded animate-pulse" />
             </div>
           </div>
         </div>
         
         {/* Project Title Skeleton */}
-        <Skeleton className="h-4 w-32 mb-2 bg-sidebar-border/60" />
+        <div className="h-4 w-28 mb-3 bg-sidebar-border/50 rounded animate-pulse" />
         
         {/* Category Badge Skeleton */}
-        <Skeleton className="h-5 w-24 bg-sidebar-border/60" />
+        <div className="h-5 w-20 bg-sidebar-border/30 rounded-full border border-sidebar-border/20" />
       </div>
     </Card>
   )
