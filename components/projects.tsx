@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useProjects } from '@/hooks/use-projects'
 import { useAuth } from '@/hooks/use-auth'
 
@@ -34,6 +35,33 @@ export function Projects() {
     window.history.pushState({}, '', `/dashboard/projects/${projectSlug}`)
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
+
+  // Skeleton loader component
+  const ProjectSkeleton = () => (
+    <Card className="group bg-sidebar-accent border-sidebar-border overflow-hidden">
+      {/* Project Preview Skeleton */}
+      <div className="aspect-[4/3] bg-sidebar-border animate-pulse" />
+      
+      {/* Project Info Skeleton */}
+      <div className="p-4">
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <Skeleton className="w-6 h-6 rounded-full" />
+            <div className="min-w-0 flex-1">
+              <Skeleton className="h-4 w-20 mb-1" />
+              <Skeleton className="h-3 w-12" />
+            </div>
+          </div>
+        </div>
+        
+        {/* Project Title Skeleton */}
+        <Skeleton className="h-4 w-32 mb-2" />
+        
+        {/* Category Badge Skeleton */}
+        <Skeleton className="h-5 w-24" />
+      </div>
+    </Card>
+  )
 
   // Format user projects for display
   const formattedUserProjects = React.useMemo(() => {
@@ -163,7 +191,14 @@ export function Projects() {
             </div>
 
             {/* Projects Grid */}
-            {filteredProjects.length > 0 ? (
+            {loading ? (
+              /* Skeleton Loading State */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-12">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <ProjectSkeleton key={index} />
+                ))}
+              </div>
+            ) : filteredProjects.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-12">
                 {filteredProjects.map((project) => (
                   <Card
