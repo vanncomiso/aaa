@@ -41,10 +41,8 @@ export function Projects() {
     <Card className="group bg-sidebar border-sidebar-border overflow-hidden">
       {/* Project Preview Skeleton - using sidebar background */}
       <div className="aspect-[4/3] bg-sidebar flex items-center justify-center relative">
-        {/* Placeholder content */}
-        <div className="w-16 h-16 bg-sidebar-accent rounded-lg flex items-center justify-center">
-          <div className="w-8 h-8 bg-sidebar-accent rounded" />
-        </div>
+        {/* Bigger square placeholder - takes up more visual space */}
+        <div className="w-24 h-24 bg-sidebar-accent rounded-lg" />
       </div>
       
       {/* Project Info Skeleton */}
