@@ -36,35 +36,41 @@ export function Projects() {
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
-  // Skeleton loader component with proper colors
+  // Enhanced skeleton loader component based on reference design
   const ProjectSkeleton = () => (
-    <Card className="group bg-sidebar border-sidebar-border overflow-hidden">
-      {/* Project Preview Skeleton - using sidebar background */}
-      <div className="aspect-[4/3] bg-sidebar flex items-center justify-center relative">
-        {/* Bigger square placeholder - takes up more visual space */}
-        <div className="w-24 h-24 bg-sidebar-accent rounded-lg" />
-      </div>
-      
-      {/* Project Info Skeleton */}
-      <div className="p-4 bg-sidebar">
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            {/* Avatar skeleton - using sidebar-accent for highlighted effect */}
-            <div className="w-6 h-6 rounded-full bg-sidebar-accent" />
-            <div className="min-w-0 flex-1">
-              {/* Author name skeleton - using sidebar-accent (highlighted color) */}
-              <div className="h-3 w-16 mb-1 bg-sidebar-accent rounded" />
-              {/* Badge skeleton */}
-              <div className="h-2 w-8 bg-sidebar-accent rounded" />
-            </div>
-          </div>
+    <Card className="group bg-sidebar-accent border-sidebar-border overflow-hidden animate-pulse">
+      {/* Project Preview Skeleton - Gradient background like reference */}
+      <div className="aspect-[4/3] bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 flex items-center justify-center relative">
+        {/* Central icon placeholder - larger and more prominent */}
+        <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+          <div className="w-8 h-8 bg-white/40 rounded-full" />
         </div>
         
-        {/* Project Title Skeleton - using sidebar-accent (highlighted color) */}
-        <div className="h-4 w-32 mb-3 bg-sidebar-accent rounded" />
+        {/* Subtle overlay for depth */}
+        <div className="absolute inset-0 bg-black/10" />
+      </div>
+      
+      {/* Project Info Skeleton - Better spacing and realistic elements */}
+      <div className="p-4 space-y-3">
+        {/* Author info section */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            {/* Avatar skeleton - gradient circle like profile pics */}
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500" />
+            <div className="min-w-0 flex-1">
+              {/* Author name skeleton - more realistic width */}
+              <div className="h-3 w-20 mb-1 bg-sidebar-border rounded-full" />
+            </div>
+          </div>
+          {/* PRO badge skeleton */}
+          <div className="h-5 w-10 bg-sidebar-border rounded-full" />
+        </div>
         
-        {/* Category Badge Skeleton - using sidebar-accent (highlighted color) */}
-        <div className="h-5 w-24 bg-sidebar-accent rounded-full" />
+        {/* Project Title Skeleton - more realistic project name length */}
+        <div className="h-5 w-28 bg-sidebar-border rounded-full mb-3" />
+        
+        {/* Category Badge Skeleton - pill shaped like "Your Project" */}
+        <div className="h-6 w-24 bg-blue-500/20 border border-blue-500/30 rounded-full" />
       </div>
     </Card>
   )
