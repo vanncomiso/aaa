@@ -36,38 +36,37 @@ export function Projects() {
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
-  // Skeleton loader component
+  // Skeleton loader component with proper colors
   const ProjectSkeleton = () => (
-    <Card className="group bg-sidebar-accent border-sidebar-border overflow-hidden animate-pulse">
-      {/* Project Preview Skeleton */}
-      <div className="aspect-[4/3] bg-gradient-to-br from-sidebar-border/40 to-sidebar-border/20 relative overflow-hidden">
-        {/* Shimmer effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-sidebar-foreground/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-        {/* Placeholder icon */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-12 h-12 rounded-lg bg-sidebar-border/30 flex items-center justify-center">
-            <div className="w-6 h-6 rounded bg-sidebar-border/50" />
-          </div>
+    <Card className="group bg-sidebar border-sidebar-border overflow-hidden">
+      {/* Project Preview Skeleton - using sidebar background */}
+      <div className="aspect-[4/3] bg-sidebar flex items-center justify-center relative">
+        {/* Placeholder content */}
+        <div className="w-16 h-16 bg-sidebar-accent rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-sidebar-accent rounded" />
         </div>
       </div>
       
       {/* Project Info Skeleton */}
-      <div className="p-4">
+      <div className="p-4 bg-sidebar">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-500/20 border border-sidebar-border/30" />
+            {/* Avatar skeleton - using sidebar-accent for highlighted effect */}
+            <div className="w-6 h-6 rounded-full bg-sidebar-accent" />
             <div className="min-w-0 flex-1">
-              <div className="h-3 w-16 mb-1 bg-sidebar-border/40 rounded animate-pulse" />
-              <div className="h-2 w-8 bg-sidebar-border/30 rounded animate-pulse" />
+              {/* Author name skeleton - using sidebar-accent (highlighted color) */}
+              <div className="h-3 w-16 mb-1 bg-sidebar-accent rounded" />
+              {/* Badge skeleton */}
+              <div className="h-2 w-8 bg-sidebar-accent rounded" />
             </div>
           </div>
         </div>
         
-        {/* Project Title Skeleton */}
-        <div className="h-4 w-28 mb-3 bg-sidebar-border/50 rounded animate-pulse" />
+        {/* Project Title Skeleton - using sidebar-accent (highlighted color) */}
+        <div className="h-4 w-32 mb-3 bg-sidebar-accent rounded" />
         
-        {/* Category Badge Skeleton */}
-        <div className="h-5 w-20 bg-sidebar-border/30 rounded-full border border-sidebar-border/20" />
+        {/* Category Badge Skeleton - using sidebar-accent (highlighted color) */}
+        <div className="h-5 w-24 bg-sidebar-accent rounded-full" />
       </div>
     </Card>
   )
